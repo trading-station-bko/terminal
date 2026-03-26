@@ -75,21 +75,19 @@
     </div>
 
     <div class="sidebar">
-        <div class="widget-box" id="calc-box">
-            <div class="widget-title">Calculateur <button class="btn-zoom" onclick="zoomTool('calc-box')">Zoom</button></div>
-            <div style="padding: 10px;">
-                <input type="number" id="balance" value="1000">
-                <input type="number" id="risk" value="1">
-                <input type="number" id="sl" value="20">
-                <button class="calc-btn" onclick="calculateLot(); sauvegarderAnalyse()">CALCULER & SAUVER</button>
-                <div id="result" style="margin-top: 10px; color: #58a6ff; font-weight: bold; text-align: center;">Lot : 0.00</div>
-                <textarea id="note" placeholder="Note d'analyse..." style="width:100%; height:50px; background:#0d1117; color:white; margin-top:5px;"></textarea>
-                <div style="display: flex; justify-content: space-between;">
-                    <button class="save-btn" onclick="copyResult()">COPIER</button>
-                    <button class="save-btn" onclick="window.print()">EXPORT PDF</button>
-                </div>
-            </div>
-        </div>
+       <div style="padding: 10px;">
+    <label style="font-size: 11px; color: #58a6ff;">Capital ($) :</label>
+    <input type="number" id="balance" value="1000" placeholder="Ex: 1000">
+    
+    <label style="font-size: 11px; color: #58a6ff;">Risque (%) :</label>
+    <input type="number" id="risk" value="1" placeholder="Ex: 1">
+    
+    <label style="font-size: 11px; color: #58a6ff;">Stop Loss (Pips) :</label>
+    <input type="number" id="sl" value="20" placeholder="Ex: 20">
+    
+    <button class="calc-btn" onclick="calculateLot(); sauvegarderAnalyse()">CALCULER & SAUVER</button>
+    <div id="result" style="margin-top: 10px; color: #58a6ff; font-weight: bold; text-align: center; font-size: 18px;">Lot : 0.00</div>
+</div>
 
         <div class="widget-box" id="price-box">
             <div class="widget-title">Prix <button class="btn-zoom" onclick="zoomTool('price-box')">Zoom</button></div>
