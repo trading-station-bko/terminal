@@ -30,36 +30,51 @@
 
         .main-chart { background: #161b22; border: 1px solid #30363d; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; }
         
-        .sidebar { display: grid; grid-template-rows: auto 1fr 1fr; gap: 5px; overflow-y: auto; transition: opacity 0.2s; }
+        .sidebar { display: grid; grid-template-rows: auto 1fr 1fr; gap: 5px; overflow-y: auto; }
+        .dashboard.fullscreen .sidebar { display: none; }
 
-        .dashboard.fullscreen .sidebar { opacity: 0; pointer-events: none; }
-
-        .widget-box { background: #161b22; border: 1px solid #30363d; border-radius: 4px; overflow: hidden; }
-        .widget-title { background: #21262d; padding: 5px 10px; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #30363d; color: #58a6ff; }
+        .widget-box { background: #161b22; border: 1px solid #30363d; border-radius: 4px; overflow: hidden; position: relative; }
         
-        .nav-btns { background: #161b22; padding: 8px; border-bottom: 1px solid #30363d; display: flex; gap: 8px; align-items: center; }
+        .widget-box.zoom-active { 
+            position: fixed; top: 50px; left: 0; width: 100vw; height: calc(100vh - 50px); z-index: 9999; 
+            background: #0d1117;
+        }
+
+        .widget-title { 
+            background: #21262d; padding: 8px 10px; font-size: 11px; text-transform: uppercase; 
+            border-bottom: 1px solid #30363d; color: #58a6ff; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .btn-zoom { background: #30363d; color: #58a6ff; border: 1px solid #444; padding: 2px 8px; cursor: pointer; border-radius: 3px; font-size: 10px; }
+
+        .nav-btns { background: #161b22; padding: 8px; border-bottom: 1px solid #30363d; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .btn-sym { background: #21262d; color: white; border: 1px solid #30363d; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+        .btn-sym:hover { background: #30363d; }
         
         .btn-toggle { background: #58a6ff; color: #0d1117; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-left: auto; }
 
-        input { width: 100%; background: #0d1117; color: white; border: 1px solid #30363d; padding: 5px; margin-bottom: 8px; border-radius: 3px; }
-        .calc-btn { background: #238636; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%; }
+        input, textarea { width: 100%; background: #0d1117; color: white; border: 1px solid #30363d; padding: 10px; margin-bottom: 8px; border-radius: 3px; font-size: 14px; }
+        textarea { height: 80px; resize: none; font-family: sans-serif; }
+        
+        .calc-btn { background: #238636; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%; }
+        .save-btn { background: #30363d; color: #c9d1d9; border: 1px solid #444; padding: 8px; cursor: pointer; border-radius: 4px; font-size: 11px; width: 48%; margin-top: 10px; }
+
+        @media print { .nav-btns, .sidebar, header, .save-btn { display: none !important; } .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <script>
-    // --- SÉCURITÉ : MOT DE PASSE PRIVÉ ---
-    // Changez "BAMAKO2026" par le code que vous voulez donner à votre frère
     var codeAcces = prompt("Accès Réservé. Veuillez entrer le code secret :");
     if (codeAcces !== "DOLOMa2030") { 
-        alert("Code incorrect ! L'accès au terminal est refusé.");
-        window.location.href = "https://www.google.com"; // Redirige vers Google en cas d'erreur
+        alert("Code incorrect !");
+        window.location.href = "https://www.google.com"; 
     }
 </script>
 
 <header>
-    <div style="font-weight: bold; color: #58a6ff;">DOLO TRADING TERMINAL v1.3</div>
+    <div style="font-weight: bold; color: #58a6ff;">DOLO TRADING TERMINAL v1.4</div>
     <div id="clock" style="font-size: 14px; opacity: 0.7;"></div>
 </header>
 
@@ -67,95 +82,106 @@
     <div class="main-chart">
         <div class="nav-btns">
             <button class="btn-sym" onclick="changeSymbol('FX:EURUSD')">EUR/USD</button>
-            <button class="btn-sym" onclick="changeSymbol('CAPITALCOM:XAUUSD')">OR (GOLD)</button>
+            <button class="btn-sym" onclick="changeSymbol('FX:GBPUSD')">GBP/USD</button>
+            <button class="btn-sym" onclick="changeSymbol('OANDA:XAUUSD')">OR (GOLD)</button>
+            <button class="btn-sym" onclick="changeSymbol('OANDA:XAGUSD')">ARGENT</button>
+            <button class="btn-sym" onclick="changeSymbol('OANDA:NAS100USD')">NAS100</button>
+            <button class="btn-sym" onclick="changeSymbol('OANDA:WTICOUSD')">PÉTROLE (WTI)</button>
             <button class="btn-sym" onclick="changeSymbol('BINANCE:BTCUSDT')">BITCOIN</button>
-            <button class="btn-toggle" id="toggleBtn" onclick="toggleSidebar()">AGRANDIR LE GRAPHIQUE</button>
+            
+            <button class="btn-toggle" id="toggleBtn" onclick="toggleFullChart()">AGRANDIR GRAPHIQUE</button>
         </div>
+        
         <div id="tradingview_chart" style="flex-grow: 1; width: 100%;"></div>
     </div>
 
     <div class="sidebar" id="sidebarArea">
-        <div class="widget-box" style="padding: 10px;">
-            <div class="widget-title" style="margin: -10px -10px 10px -10px;">Calculateur de Lot</div>
-            <label style="font-size: 11px;">Capital ($):</label>
-            <input type="number" id="balance" value="1000">
-            <label style="font-size: 11px;">Risque (%):</label>
-            <input type="number" id="risk" value="1">
-            <label style="font-size: 11px;">Stop Loss (Pips):</label>
-            <input type="number" id="sl" value="20">
-            <button class="calc-btn" onclick="calculateLot()">CALCULER LE LOT</button>
-            <div id="result" style="margin-top: 10px; color: #58a6ff; font-weight: bold; text-align: center; font-size: 18px;">Lot : 0.00</div>
+        <div class="widget-box" id="calc-box">
+            <div class="widget-title">
+                Calculateur & Analyses
+                <button class="btn-zoom" onclick="zoomTool('calc-box')">AGRANDIR / RÉDUIRE</button>
+            </div>
+            <div style="padding: 10px;">
+                <label style="font-size: 11px;">Capital ($):</label>
+                <input type="number" id="balance" value="1000">
+                <label style="font-size: 11px;">Stop Loss (Pips):</label>
+                <input type="number" id="sl" value="20">
+                <button class="calc-btn" onclick="calculateLot()">CALCULER LE LOT</button>
+                <div id="result" style="margin: 10px 0; color: #58a6ff; font-weight: bold; text-align: center; font-size: 20px;">Lot : 0.00</div>
+                
+                <p style="font-size: 10px; color: #8b949e; margin-bottom: 5px;">--- HISTORIQUE DES ANALYSES ---</p>
+                <textarea id="notes" placeholder="Tapez une note ici (ex: Achat Or @2030)..."></textarea>
+                
+                <div style="display: flex; justify-content: space-between;">
+                    <button class="save-btn" onclick="copyAll()">COPIER TOUT</button>
+                    <button class="save-btn" onclick="window.print()">EXPORT PDF</button>
+                </div>
+            </div>
         </div>
 
-        <div class="widget-box">
-            <div class="widget-title">Prix Temps Réel</div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-            { "colorTheme": "dark", "showChart": false, "locale": "fr", "width": "100%", "height": "100%", "isTransparent": true,
-              "tabs": [{ "title": "Forex", "symbols": [{"s":"FX:EURUSD"},{"s":"FX:GBPUSD"},{"s":"BITSTAMP:BTCUSD"}] }] }
-            </script>
+        <div class="widget-box" id="price-box">
+            <div class="widget-title">
+                Prix Marché
+                <button class="btn-zoom" onclick="zoomTool('price-box')">AGRANDIR / RÉDUIRE</button>
+            </div>
+            <div style="height: 300px;">
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+                { "colorTheme": "dark", "showChart": false, "locale": "fr", "width": "100%", "height": "100%", "isTransparent": true,
+                  "tabs": [{ "title": "Actifs", "symbols": [
+                      {"s":"FX:EURUSD"}, {"s":"FX:GBPUSD"}, {"s":"OANDA:XAUUSD"}, 
+                      {"s":"OANDA:NAS100USD"}, {"s":"OANDA:WTICOUSD"}, {"s":"BINANCE:BTCUSDT"}
+                  ] }] }
+                </script>
+            </div>
         </div>
 
-        <div class="widget-box">
-            <div class="widget-title">Événements Éco</div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-            { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "fr", "importanceFilter": "-1,0,1" }
-            </script>
+        <div class="widget-box" id="news-box">
+            <div class="widget-title">
+                Événements Éco
+                <button class="btn-zoom" onclick="zoomTool('news-box')">AGRANDIR / RÉDUIRE</button>
+            </div>
+            <div style="height: 300px;">
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "fr", "importanceFilter": "-1,0,1" }
+                </script>
+            </div>
         </div>
     </div>
 </div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    function toggleSidebar() {
+    function zoomTool(id) { document.getElementById(id).classList.toggle('zoom-active'); }
+
+    function toggleFullChart() {
         const dashboard = document.getElementById('mainDashboard');
         const btn = document.getElementById('toggleBtn');
-        if (dashboard.classList.contains('fullscreen')) {
-            dashboard.classList.remove('fullscreen');
-            btn.innerText = "AGRANDIR LE GRAPHIQUE";
-            btn.style.background = "#58a6ff";
-        } else {
-            dashboard.classList.add('fullscreen');
-            btn.innerText = "MONTRER LES OUTILS";
-            btn.style.background = "#238636";
-        }
+        dashboard.classList.toggle('fullscreen');
+        btn.innerText = dashboard.classList.contains('fullscreen') ? "MONTRER OUTILS" : "AGRANDIR GRAPHIQUE";
     }
 
-    let currentWidget;
     function loadChart(symbol) {
-        currentWidget = new TradingView.widget({
-            "autosize": true,
-            "symbol": symbol,
-            "interval": "H1",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": "fr",
-            "toolbar_bg": "#f1f3f6",
-            "enable_publishing": false,
-            "hide_side_toolbar": false, // Affiche les outils de dessin
-            "show_countdown": true,     // Affiche le chrono de la bougie
-            "allow_symbol_change": true,
-            "save_image": true,
-            "container_id": "tradingview_chart"
+        new TradingView.widget({
+            "autosize": true, "symbol": symbol, "interval": "H1", "theme": "dark", "style": "1", "locale": "fr", "container_id": "tradingview_chart"
         });
     }
-    
+
     function changeSymbol(name) { loadChart(name); }
 
     function calculateLot() {
         const balance = document.getElementById('balance').value;
-        const risk = document.getElementById('risk').value;
         const sl = document.getElementById('sl').value;
-        const lotSize = (balance * (risk / 100)) / (sl * 10);
+        const lotSize = (balance * 0.01) / (sl * 10); // Risque fixe 1% pour la sécurité
         document.getElementById('result').innerText = "Lot : " + lotSize.toFixed(2);
     }
 
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleString();
-    }, 1000);
+    function copyAll() {
+        const text = "Analyse Dolo Terminal\n" + document.getElementById('result').innerText + "\nNote : " + document.getElementById('notes').value;
+        navigator.clipboard.writeText(text).then(() => alert("Analyse copiée !"));
+    }
 
-    loadChart("FX:EURUSD");
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
+    window.onload = function() { loadChart("FX:EURUSD"); };
 </script>
-
 </body>
 </html>
