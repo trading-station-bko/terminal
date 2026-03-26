@@ -47,64 +47,54 @@
     </style>
 </head>
 <body>
-<script>
-    var codeAcces = prompt("Accès Réservé. Veuillez entrer le code secret :");
-    if (codeAcces !== "DOLOMa2030") { 
-        alert("Code incorrect !");
-        window.location.href = "https://www.google.com"; 
-    }
-</script>
 
-<header>
-    <div style="font-weight: bold; color: #58a6ff;">DOLO TRADING TERMINAL v1.5</div>
-    <div id="clock" style="font-size: 14px; opacity: 0.7;"></div>
-</header>
-
-<div class="dashboard" id="mainDashboard">
-    <div class="main-chart">
-        <div class="nav-btns">
-            <button class="btn-sym" onclick="changeSymbol('FX:EURUSD')">EUR/USD</button>
-            <button class="btn-sym" onclick="changeSymbol('FX:GBPUSD')">GBP/USD</button>
-            <button class="btn-sym" onclick="changeSymbol('OANDA:XAUUSD')">OR (GOLD)</button>
-            <button class="btn-sym" onclick="changeSymbol('OANDA:XAGUSD')">ARGENT (SILVER)</button>
-            <button class="btn-sym" onclick="changeSymbol('OANDA:NAS100USD')">NAS100</button>
-            <button class="btn-sym" onclick="changeSymbol('BINANCE:BTCUSDT')">BITCOIN</button>
-            <button class="btn-toggle" id="toggleBtn" onclick="toggleFullChart()">PLEIN ÉCRAN</button>
+<div id="auth-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #131722; color: white;">
+    <h2>Connexion Trading Terminal</h2>
+    <div style="width: 300px;">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.handleLogin()" style="flex: 1; padding: 12px; background: #2962ff; color: white; border: none; cursor: pointer; border-radius: 4px;">Se connecter</button>
+            <button onclick="window.handleSignUp()" style="flex: 1; padding: 12px; background: #4caf50; color: white; border: none; cursor: pointer; border-radius: 4px;">S'inscrire</button>
         </div>
-        <div id="tradingview_chart" style="flex-grow: 1; width: 100%;"></div>
     </div>
-
-    <div class="sidebar">
-       <div style="padding: 10px;">
-    <label style="font-size: 11px; color: #58a6ff;">Capital ($) :</label>
-    <input type="number" id="balance" value="1000" placeholder="Ex: 1000">
-    
-    <label style="font-size: 11px; color: #58a6ff;">Risque (%) :</label>
-    <input type="number" id="risk" value="1" placeholder="Ex: 1">
-    
-    <label style="font-size: 11px; color: #58a6ff;">Stop Loss (Pips) :</label>
-    <input type="number" id="sl" value="20" placeholder="Ex: 20">
-    
-    <button class="calc-btn" onclick="calculateLot(); sauvegarderAnalyse()">CALCULER & SAUVER</button>
-    <div id="result" style="margin-top: 10px; color: #58a6ff; font-weight: bold; text-align: center; font-size: 18px;">Lot : 0.00</div>
 </div>
 
-        <div class="widget-box" id="price-box">
-            <div class="widget-title">Prix <button class="btn-zoom" onclick="zoomTool('price-box')">Zoom</button></div>
-            <div style="height: 300px;">
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-                { "colorTheme": "dark", "showChart": false, "locale": "fr", "width": "100%", "height": "100%", "isTransparent": true,
-                  "tabs": [{ "title": "Actifs", "symbols": [{"s":"FX:EURUSD"},{"s":"FX:GBPUSD"},{"s":"TVC:GOLD"},{"s":"TVC:SILVER"},{"s":"BINANCE:BTCUSDT"}] }] }
-                </script>
+<div id="main-terminal" style="display: none;">
+    <header>
+        <div style="font-weight: bold; color: #58a6ff;">DOLO TRADING TERMINAL v1.5</div>
+        <button onclick="window.handleLogout()" style="background: transparent; color: #f85149; border: 1px solid #f85149; padding: 4px 8px; cursor: pointer; border-radius: 4px; font-size: 12px;">Déconnexion</button>
+    </header>
+
+    <div class="dashboard" id="mainDashboard">
+        <div class="main-chart">
+            <div class="nav-btns">
+                <button class="btn-sym" onclick="changeSymbol('FX:EURUSD')">EUR/USD</button>
+                <button class="btn-sym" onclick="changeSymbol('FX:GBPUSD')">GBP/USD</button>
+                <button class="btn-sym" onclick="changeSymbol('OANDA:XAUUSD')">OR (GOLD)</button>
+                <button class="btn-sym" onclick="changeSymbol('OANDA:XAGUSD')">ARGENT (SILVER)</button>
+                <button class="btn-sym" onclick="changeSymbol('OANDA:NAS100USD')">NAS100</button>
+                <button class="btn-sym" onclick="changeSymbol('BINANCE:BTCUSDT')">BITCOIN</button>
+                <button class="btn-toggle" id="toggleBtn" onclick="toggleFullChart()">PLEIN ÉCRAN</button>
             </div>
+            <div id="tradingview_chart" style="flex-grow: 1; width: 100%;"></div>
         </div>
 
-        <div class="widget-box" id="news-box">
-            <div class="widget-title">Éco <button class="btn-zoom" onclick="zoomTool('news-box')">Zoom</button></div>
-            <div style="height: 300px;">
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "fr" }
-                </script>
+        <div class="sidebar">
+           <div style="padding: 10px;">
+                <label style="font-size: 11px; color: #58a6ff;">Capital ($) :</label>
+                <input type="number" id="balance" value="1000">
+                <label style="font-size: 11px; color: #58a6ff;">Risque (%) :</label>
+                <input type="number" id="risk" value="1">
+                <label style="font-size: 11px; color: #58a6ff;">Stop Loss (Pips) :</label>
+                <input type="number" id="sl" value="20">
+                <button class="calc-btn" onclick="lancerCalculEtSauve()">CALCULER & SAUVER</button>
+                <div id="result" style="margin-top: 10px; color: #58a6ff; font-weight: bold; text-align: center; font-size: 18px;">Lot : 0.00</div>
+            </div>
+
+            <div class="widget-box" id="price-box">
+                <div class="widget-title">Prix</div>
+                <div style="height: 300px;" id="widget-market"></div>
             </div>
         </div>
     </div>
@@ -113,68 +103,92 @@
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script type="module">
+  // 1. Imports des bibliothèques Google
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+  // 2. Ta configuration personnelle (NE PAS CHANGER)
   const firebaseConfig = {
     apiKey: "AIzaSyDcQYVYiZ0QrvuXrAkjFhROBRfAcVNiZRU",
     authDomain: "dolo-trading-terminal.firebaseapp.com",
     projectId: "dolo-trading-terminal",
     storageBucket: "dolo-trading-terminal.firebasestorage.app",
     messagingSenderId: "262978311881",
-    appId: "1:262978311881:web:c6a7479d181de2d46a5f18",
-    measurementId: "G-BS22SR74G1"
+    appId: "1:262978311881:web:c6a7479d181de2d46a5f18"
   };
 
+  // 3. Initialisation de Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
 
-  window.zoomTool = function(id) { document.getElementById(id).classList.toggle('zoom-active'); };
-  window.toggleFullChart = function() { document.getElementById('mainDashboard').classList.toggle('fullscreen'); };
+  // --- 4. LES FONCTIONS DE CONNEXION (Rendues Publiques) ---
 
-  window.loadChart = function(symbol) {
+  window.handleLogin = async function() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    if (!email || !pass) { alert("Remplis tous les champs"); return; }
+    try { 
+      await signInWithEmailAndPassword(auth, email, pass); 
+    } catch (e) { alert("Erreur de connexion : " + e.message); }
+  };
+
+  window.handleSignUp = async function() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    if (pass.length < 6) { alert("Le mot de passe doit faire 6 caractères minimum"); return; }
+    try { 
+      await createUserWithEmailAndPassword(auth, email, pass);
+      alert("Compte créé avec succès !");
+    } catch (e) { alert("Erreur d'inscription : " + e.message); }
+  };
+
+  window.handleLogout = function() {
+    signOut(auth);
+  };
+
+  // 5. Surveillance de l'état de connexion (Affiche/Cache le terminal)
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('main-terminal').style.display = 'block';
+      // On lance le graphique seulement quand on est connecté
       new TradingView.widget({
-          "autosize": true,
-          "symbol": symbol,
-          "interval": "H1",
-          "theme": "dark",
-          "style": "1",
-          "locale": "fr",
-          "container_id": "tradingview_chart",
-          "drawings_toolbar": true, // <--- LA BARRE D'OUTILS DE GAUCHE
-          "enable_publishing": false,
-          "allow_symbol_change": true,
-          "hide_side_toolbar": false // <--- AFFICHE LA BARRE LATERALE
+        "width": "100%", "height": "100%", "symbol": "FX:EURUSD",
+        "interval": "D", "timezone": "Etc/UTC", "theme": "dark",
+        "style": "1", "locale": "fr", "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false, "allow_symbol_change": true,
+        "container_id": "tradingview_chart"
       });
-  };
-
-  window.changeSymbol = function(name) { window.loadChart(name); };
-
-  window.calculateLot = function() {
-      const balance = document.getElementById('balance').value;
-      const risk = document.getElementById('risk').value;
-      const sl = document.getElementById('sl').value;
-      const lotSize = (balance * (risk / 100)) / (sl * 10);
-      document.getElementById('result').innerText = "Lot : " + lotSize.toFixed(2);
-  };
-
-  window.copyResult = function() {
-      navigator.clipboard.writeText(document.getElementById('result').innerText).then(() => alert("Copié !"));
-  };
-
-  window.sauvegarderAnalyse = async function() {
-    const note = document.getElementById('note').value;
-    if(note.trim() !== "") {
-        try {
-            await setDoc(doc(db, "analyses", "mon_journal"), { texte: note, date: new Date().toLocaleString() });
-            alert("Sauvegarde Cloud réussie !");
-        } catch (e) { console.error(e); }
+    } else {
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('main-terminal').style.display = 'none';
     }
-  };
+  });
 
-  window.onload = function() {
-      window.loadChart("FX:EURUSD");
-      setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString(); }, 1000);
+  // 6. Fonction pour Sauvegarder
+  window.lancerCalculEtSauve = async function() {
+    const capital = document.getElementById('balance').value;
+    const risque = document.getElementById('risk').value;
+    const sl = document.getElementById('sl').value;
+    const lot = (capital * (risque/100)) / (sl * 10);
+    document.getElementById('result').innerText = "Lot : " + lot.toFixed(2);
+
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await addDoc(collection(db, "analyses"), {
+          capital: capital,
+          risque: risque,
+          sl: sl,
+          lot: lot.toFixed(2),
+          userId: user.uid,
+          timestamp: new Date()
+        });
+        alert("Analyse sauvegardée dans ton espace privé !");
+      } catch (e) { alert("Erreur de sauvegarde : " + e.message); }
+    }
   };
 </script>
 </body>
